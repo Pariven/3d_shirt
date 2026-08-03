@@ -275,6 +275,53 @@ export default function App() {
           scrollTrigger: { trigger: '#transmission', start: 'top bottom', end: 'bottom top', scrub: true },
         },
       )
+
+      // VOID POINTS tiers surface one by one — the deeper you go
+      gsap.fromTo(
+        '[data-tier]',
+        { y: 64, autoAlpha: 0 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 1.2,
+          stagger: 0.18,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '#points', start: 'top 70%' },
+        },
+      )
+
+      // footer wordmark rises letter by letter out of the void
+      gsap.fromTo(
+        '[data-fletter]',
+        { yPercent: 110 },
+        {
+          yPercent: 0,
+          duration: 1.1,
+          stagger: 0.055,
+          ease: 'power4.out',
+          scrollTrigger: { trigger: '[data-footer-word]', start: 'top 90%' },
+        },
+      )
+
+      // footer columns + divider line
+      gsap.fromTo(
+        '[data-fcol]',
+        { y: 36, autoAlpha: 0 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 1,
+          stagger: 0.12,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '[data-fcol]', start: 'top 85%' },
+        },
+      )
+      gsap.to('[data-footer-line]', {
+        scaleX: 1,
+        duration: 1.6,
+        ease: 'power3.inOut',
+        scrollTrigger: { trigger: '[data-footer-line]', start: 'top 94%' },
+      })
       gsap.utils.toArray('[data-reveal]').forEach((el) => {
         gsap.fromTo(
           el,
@@ -591,9 +638,14 @@ export default function App() {
           >
             THE DEEPER YOU GO.
           </h2>
-          <div data-reveal className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
             {TIERS.map((t) => (
-              <div key={t.n} className="border border-[#f4f4f2]/10 bg-[#0c0c0c] p-8">
+              <div
+                key={t.n}
+                data-tier
+                data-cursor
+                className="tier-card border border-[#f4f4f2]/10 bg-[#0c0c0c] p-8"
+              >
                 <div className="flex items-baseline justify-between">
                   <span className="font-label text-[10px] font-light tracking-[0.4em] text-[#f4f4f2]/30">
                     {t.n}
@@ -608,6 +660,7 @@ export default function App() {
                 <p className="mt-5 font-body text-[13px] font-light leading-relaxed tracking-[0.02em] text-[#f4f4f2]/50">
                   {t.copy}
                 </p>
+                <div className="tier-line mt-8 h-px w-full bg-[#f4f4f2]/40" />
               </div>
             ))}
           </div>
@@ -636,7 +689,7 @@ export default function App() {
         <footer className="relative mt-16">
           <Marquee />
           <div className="grid grid-cols-2 gap-12 px-6 py-16 md:grid-cols-4 md:px-10 lg:px-20">
-            <div>
+            <div data-fcol>
               <p className="font-label text-[9px] font-light tracking-[0.45em] text-[#f4f4f2]/30">SHOP</p>
               <ul className="mt-6 space-y-3 font-label text-[10px] font-light tracking-[0.3em] text-[#f4f4f2]/55">
                 <li><a href="#collection" className="nav-link">TEES</a></li>
@@ -645,7 +698,7 @@ export default function App() {
                 <li><a href="#collection" className="nav-link">ACCESSORIES</a></li>
               </ul>
             </div>
-            <div>
+            <div data-fcol>
               <p className="font-label text-[9px] font-light tracking-[0.45em] text-[#f4f4f2]/30">CARE</p>
               <ul className="mt-6 space-y-3 font-label text-[10px] font-light tracking-[0.3em] text-[#f4f4f2]/55">
                 <li><a href="#hero" className="nav-link">SHIPPING</a></li>
@@ -654,7 +707,7 @@ export default function App() {
                 <li><a href="#hero" className="nav-link">FAQ</a></li>
               </ul>
             </div>
-            <div>
+            <div data-fcol>
               <p className="font-label text-[9px] font-light tracking-[0.45em] text-[#f4f4f2]/30">BRAND</p>
               <ul className="mt-6 space-y-3 font-label text-[10px] font-light tracking-[0.3em] text-[#f4f4f2]/55">
                 <li><a href="#about" className="nav-link">ABOUT</a></li>
@@ -662,7 +715,7 @@ export default function App() {
                 <li><a href="#points" className="nav-link">MEMBERS</a></li>
               </ul>
             </div>
-            <div>
+            <div data-fcol>
               <p className="font-label text-[9px] font-light tracking-[0.45em] text-[#f4f4f2]/30">SIGNAL</p>
               <ul className="mt-6 space-y-3 font-label text-[10px] font-light tracking-[0.3em] text-[#f4f4f2]/55">
                 <li><a href="#hero" className="nav-link">INSTAGRAM</a></li>
@@ -672,10 +725,18 @@ export default function App() {
             </div>
           </div>
           <div className="px-6 pb-10 md:px-10">
-            <p className="text-stroke text-center font-display text-[clamp(3rem,12vw,12rem)] font-semibold leading-none tracking-[0.15em]">
-              VOIDNOIR
+            <p
+              data-footer-word
+              className="footer-word overflow-hidden text-center font-display text-[clamp(3rem,12vw,12rem)] font-semibold leading-none tracking-[0.15em]"
+            >
+              {'VOIDNOIR'.split('').map((ch, i) => (
+                <span key={i} data-fletter className="inline-block">
+                  {ch}
+                </span>
+              ))}
             </p>
-            <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#f4f4f2]/10 pt-8 md:flex-row">
+            <div data-footer-line className="mt-10 h-px w-full origin-left scale-x-0 bg-[#f4f4f2]/15" />
+            <div className="flex flex-col items-center justify-between gap-4 pt-8 md:flex-row">
               <p className="font-label text-[9px] font-light tracking-[0.35em] text-[#f4f4f2]/30">
                 © 2026 VOIDNOIR — ALL RIGHTS RESERVED
               </p>
