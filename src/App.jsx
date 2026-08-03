@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
-import { useProgress } from '@react-three/drei'
-import Experience from './components/Experience.jsx'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -39,34 +37,6 @@ const DROP_PIECES = [
     viewing: false,
   },
 ]
-
-function Loader() {
-  const { progress, active } = useProgress()
-  const [gone, setGone] = useState(false)
-
-  useEffect(() => {
-    if (!active && progress >= 100) {
-      const id = setTimeout(() => setGone(true), 900)
-      return () => clearTimeout(id)
-    }
-  }, [active, progress])
-
-  if (gone) return null
-  return (
-    <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black transition-opacity duration-700 ${
-        !active && progress >= 100 ? 'opacity-0' : 'opacity-100'
-      }`}
-    >
-      <p className="font-display text-5xl font-light tracking-[0.3em] text-[#f4f4f2]">
-        {Math.round(progress)}%
-      </p>
-      <p className="mt-6 font-label text-[10px] font-light tracking-[0.6em] text-[#f4f4f2]/40">
-        ENTERING THE VOID
-      </p>
-    </div>
-  )
-}
 
 function Marquee() {
   const row = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
@@ -165,17 +135,12 @@ export default function App() {
 
   return (
     <>
-      <Loader />
-
       {/* matte void background + hairline grid */}
       <div id="page-bg" className="void-bg fixed inset-0 z-0">
         <div className="hairlines absolute inset-0" />
       </div>
 
       <div className="grain" />
-
-      {/* 3D layer */}
-      <Experience />
 
       {/* fixed UI */}
       <header className="fixed inset-x-0 top-0 z-50">
