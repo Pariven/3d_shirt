@@ -79,6 +79,93 @@ const MENU_LINKS = [
   { n: '06', name: 'ACCOUNT', href: '#hero' },
 ]
 
+function Preloader() {
+  const root = useRef(null)
+  const [done, setDone] = useState(false)
+
+  useEffect(() => {
+    const counter = { v: 0 }
+    const el = root.current
+    if (!el) return
+    const num = el.querySelector('[data-count]')
+    const ctx = gsap.context(() => {
+      gsap.set('[data-load-letter]', { yPercent: 120 })
+      const tl = gsap.timeline({ onComplete: () => setDone(true) })
+      tl.to(counter, {
+        v: 100,
+        duration: 1.4,
+        ease: 'power2.inOut',
+        onUpdate: () => {
+          num.textContent = String(Math.round(counter.v)).padStart(3, '0')
+        },
+      })
+        .to('[data-load-bar]', { scaleX: 1, duration: 1.4, ease: 'power2.inOut' }, 0)
+        .to('[data-load-meta]', { yPercent: -30, autoAlpha: 0, duration: 0.45, ease: 'power3.in' }, '+=0.1')
+        .fromTo(
+          '[data-load-letter]',
+          { yPercent: 120 },
+          { yPercent: 0, duration: 0.7, stagger: 0.05, ease: 'power4.out' },
+          '-=0.15',
+        )
+        .to(
+          '[data-load-letter]',
+          { yPercent: -120, duration: 0.55, stagger: 0.035, ease: 'power3.in' },
+          '+=0.3',
+        )
+        .to('[data-panel-top]', { yPercent: -100, duration: 0.85, ease: 'power4.inOut' }, '-=0.2')
+        .to('[data-panel-bot]', { yPercent: 100, duration: 0.85, ease: 'power4.inOut' }, '<')
+    }, el)
+    return () => ctx.revert()
+  }, [])
+
+  if (done) return null
+  return (
+    <div ref={root} className="fixed inset-0 z-[120]">
+      <div data-panel-top className="absolute inset-x-0 top-0 h-1/2 border-b border-[#f4f4f2]/10 bg-[#050505]" />
+      <div data-panel-bot className="absolute inset-x-0 bottom-0 h-1/2 bg-[#050505]" />
+
+      {/* counter + editorial frame */}
+      <div data-load-meta className="absolute inset-0">
+        <p className="absolute left-6 top-6 font-label text-[10px] font-light tracking-[0.5em] text-[#f4f4f2]/40 md:left-10 md:top-8">
+          VOIDNOIR®
+        </p>
+        <p className="absolute right-6 top-6 font-label text-[10px] font-light tracking-[0.5em] text-[#f4f4f2]/40 md:right-10 md:top-8">
+          DROP 01 — SOVEREIGN
+        </p>
+        <p className="absolute bottom-6 left-6 font-label text-[10px] font-light tracking-[0.5em] text-[#f4f4f2]/40 md:bottom-8 md:left-10">
+          AW26
+        </p>
+        <p className="absolute bottom-6 right-6 font-label text-[10px] font-light tracking-[0.5em] text-[#f4f4f2]/40 md:bottom-8 md:right-10">
+          KUALA LUMPUR
+        </p>
+
+        <div className="flex h-full flex-col items-center justify-center">
+          <p data-count className="font-display text-7xl font-light tracking-[0.2em] text-[#f4f4f2] md:text-8xl">
+            000
+          </p>
+          <div className="mt-8 h-px w-48 bg-[#f4f4f2]/15">
+            <div data-load-bar className="h-full w-full origin-left scale-x-0 bg-[#f4f4f2]/80" />
+          </div>
+          <p className="mt-6 font-label text-[10px] font-light tracking-[0.7em] text-[#f4f4f2]/40">
+            ENTERING THE VOID
+          </p>
+        </div>
+      </div>
+
+      {/* wordmark pass */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <p className="overflow-hidden py-2 font-display text-[clamp(2.8rem,10vw,9rem)] font-medium leading-none tracking-[0.08em] text-[#f4f4f2]">
+          {'VOIDNOIR'.split('').map((ch, i) => (
+            <span key={i} data-load-letter className="inline-block will-change-transform">
+              {ch}
+            </span>
+          ))}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function Cursor() {
   const dot = useRef(null)
   const ring = useRef(null)
@@ -89,7 +176,12 @@ function Cursor() {
     const yd = gsap.quickTo(dot.current, 'y', { duration: 0.06, ease: 'power2.out' })
     const xr = gsap.quickTo(ring.current, 'x', { duration: 0.4, ease: 'power3.out' })
     const yr = gsap.quickTo(ring.current, 'y', { duration: 0.4, ease: 'power3.out' })
+    let shown = false
     const move = (e) => {
+      if (!shown) {
+        shown = true
+        gsap.set([dot.current, ring.current], { autoAlpha: 1 })
+      }
       xd(e.clientX)
       yd(e.clientY)
       xr(e.clientX)
@@ -109,8 +201,8 @@ function Cursor() {
 
   return (
     <>
-      <div ref={dot} className="cursor-dot" />
-      <div ref={ring} className="cursor-ring" />
+      <div ref={dot} className="cursor-dot opacity-0" />
+      <div ref={ring} className="cursor-ring opacity-0" />
     </>
   )
 }
@@ -231,18 +323,23 @@ export default function App() {
     gsap.ticker.add(raf)
     gsap.ticker.lagSmoothing(0)
 
+    // hold the page still while the preloader runs
+    lenis.stop()
+    const unlock = setTimeout(() => lenis.start(), 4600)
+
     const ctx = gsap.context(() => {
+      // hero enters as the preloader curtain opens
       gsap.fromTo(
         '[data-hero-fade]',
         { autoAlpha: 0, y: 28 },
-        { autoAlpha: 1, y: 0, duration: 1.6, stagger: 0.14, delay: 0.9, ease: 'power2.out' },
+        { autoAlpha: 1, y: 0, duration: 1.6, stagger: 0.14, delay: 4.0, ease: 'power2.out' },
       )
 
       // hero image: slow settle on load, then drifts as you scroll
       gsap.fromTo(
         '#hero-img',
         { scale: 1.18, autoAlpha: 0 },
-        { scale: 1, autoAlpha: 1, duration: 2.6, delay: 0.3, ease: 'power2.out' },
+        { scale: 1, autoAlpha: 1, duration: 2.6, delay: 3.7, ease: 'power2.out' },
       )
       gsap.to('#hero-img', {
         yPercent: 14,
@@ -349,6 +446,7 @@ export default function App() {
     })
 
     return () => {
+      clearTimeout(unlock)
       ctx.revert()
       gsap.ticker.remove(raf)
       lenis.destroy()
@@ -363,6 +461,8 @@ export default function App() {
       </div>
 
       <div className="grain" />
+
+      <Preloader />
 
       <Cursor />
 
