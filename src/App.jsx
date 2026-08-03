@@ -496,20 +496,23 @@ export default function App() {
 
       {/* fixed UI */}
       <header className="fixed inset-x-0 top-0 z-[85]">
-        <nav className="grid grid-cols-3 items-center px-6 py-6 text-[#f4f4f2] md:px-10">
-          <p className="font-label text-[10px] font-light tracking-[0.35em] text-[#f4f4f2]/50">
+        <nav className="relative flex items-center justify-between px-6 py-6 text-[#f4f4f2] md:px-10">
+          <p className="whitespace-nowrap font-label text-[10px] font-light tracking-[0.35em] text-[#f4f4f2]/50">
             {time && `${time} KL`}
           </p>
-          <a href="#hero" className="justify-self-center font-display text-base font-medium tracking-[0.45em]">
+          <a
+            href="#hero"
+            className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-display text-sm font-medium tracking-[0.35em] md:text-base md:tracking-[0.45em]"
+          >
             VOIDNOIR
           </a>
-          <div className="flex items-center justify-self-end gap-8 font-label text-[10px] font-light tracking-[0.35em]">
+          <div className="flex items-center gap-5 font-label text-[10px] font-light tracking-[0.35em] md:gap-8">
             <a href="#collection" className="nav-link hidden md:inline">SHOP</a>
             <a href="#about" className="nav-link hidden md:inline">ABOUT</a>
-            <button className="nav-link">CART (0)</button>
+            <button className="nav-link hidden whitespace-nowrap md:inline">CART (0)</button>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="nav-link tracking-[0.35em]"
+              className="nav-link whitespace-nowrap tracking-[0.35em]"
             >
               {menuOpen ? 'CLOSE' : 'MENU'}
             </button>
@@ -577,13 +580,16 @@ export default function App() {
             <div data-hero-fade className="scroll-cue hidden text-center font-label text-[9px] font-light tracking-[0.6em] text-[#f4f4f2]/45 md:block">
               SCROLL
             </div>
-            <div data-hero-fade className="flex gap-4">
-              <a href="#about" className="btn-void px-7 py-3 font-label text-[10px] font-light tracking-[0.3em]">
+            <div data-hero-fade className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
+              <a
+                href="#about"
+                className="btn-void whitespace-nowrap px-7 py-3 text-center font-label text-[10px] font-light tracking-[0.3em]"
+              >
                 ENTER THE VOID
               </a>
               <a
                 href="#collection"
-                className="btn-void border-[#f4f4f2]/80 px-7 py-3 font-label text-[10px] font-light tracking-[0.3em]"
+                className="btn-void whitespace-nowrap border-[#f4f4f2]/80 px-7 py-3 text-center font-label text-[10px] font-light tracking-[0.3em]"
               >
                 VIEW COLLECTION
               </a>
@@ -676,7 +682,7 @@ export default function App() {
                   {c.n}
                 </span>
                 <div className="relative">
-                  <span className="block font-display text-xl font-medium tracking-[0.14em] text-[#f4f4f2] md:text-2xl">
+                  <span className="block font-display text-sm font-medium tracking-[0.1em] text-[#f4f4f2] sm:text-xl sm:tracking-[0.14em] md:text-2xl">
                     {c.name}
                   </span>
                   <span className="mt-3 block font-label text-[8px] font-light tracking-[0.4em] text-[#f4f4f2]/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
