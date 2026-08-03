@@ -171,6 +171,56 @@ body {
   transform: scale(1.05);
 }
 
+/* ---- every photo renders monochrome — the void has no colour ---- */
+.img-mono {
+  filter: grayscale(1) contrast(1.06) brightness(0.9);
+}
+
+/* ---- CRT scanlines for transmission imagery ---- */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 3px,
+    rgba(0, 0, 0, 0.28) 3px,
+    rgba(0, 0, 0, 0.28) 4px
+  );
+}
+
+/* ---- custom cursor: dot + trailing ring, inverts over content ---- */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 200;
+  mix-blend-mode: difference;
+}
+.cursor-dot {
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  background: #f4f4f2;
+}
+.cursor-ring {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid rgba(244, 244, 242, 0.6);
+}
+@media (pointer: coarse) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none;
+  }
+}
+
 /* ---- category card ghost hover ---- */
 .cat-card {
   background: #0c0c0c;

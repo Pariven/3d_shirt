@@ -23,6 +23,7 @@ const PRODUCTS = [
     price: 'RM209',
     badge: 'NEW',
     statement: '“MADE OF QUIET POETRY”',
+    img: '/images/card-quiet-poetry.jpg',
   },
   {
     code: 'VN-T001',
@@ -32,6 +33,7 @@ const PRODUCTS = [
     price: 'RM189',
     badge: 'LIMITED',
     statement: '“PURPOSE AND TRUTH”',
+    img: '/images/card-origin.jpg',
   },
   {
     code: 'VN-H001',
@@ -41,6 +43,7 @@ const PRODUCTS = [
     price: 'RM329',
     badge: 'NEW',
     statement: '“BECOME WHAT ONE COULDN’T ESCAPE”',
+    img: '/images/card-ascent.jpg',
   },
   {
     code: 'VN-X000',
@@ -55,10 +58,10 @@ const PRODUCTS = [
 ]
 
 const CATEGORIES = [
-  { n: '01', name: 'TEES' },
-  { n: '02', name: 'OUTERWEAR' },
-  { n: '03', name: 'BOTTOMS' },
-  { n: '04', name: 'ACCESSORIES' },
+  { n: '01', name: 'TEES', img: '/images/cat-tees.jpg' },
+  { n: '02', name: 'OUTERWEAR', img: '/images/cat-outerwear.jpg' },
+  { n: '03', name: 'BOTTOMS', img: '/images/cat-bottoms.jpg' },
+  { n: '04', name: 'ACCESSORIES', img: '/images/cat-accessories.jpg' },
 ]
 
 const TIERS = [
@@ -75,6 +78,42 @@ const MENU_LINKS = [
   { n: '05', name: 'ABOUT', href: '#about' },
   { n: '06', name: 'ACCOUNT', href: '#hero' },
 ]
+
+function Cursor() {
+  const dot = useRef(null)
+  const ring = useRef(null)
+
+  useEffect(() => {
+    if (window.matchMedia('(pointer: coarse)').matches) return
+    const xd = gsap.quickTo(dot.current, 'x', { duration: 0.06, ease: 'power2.out' })
+    const yd = gsap.quickTo(dot.current, 'y', { duration: 0.06, ease: 'power2.out' })
+    const xr = gsap.quickTo(ring.current, 'x', { duration: 0.4, ease: 'power3.out' })
+    const yr = gsap.quickTo(ring.current, 'y', { duration: 0.4, ease: 'power3.out' })
+    const move = (e) => {
+      xd(e.clientX)
+      yd(e.clientY)
+      xr(e.clientX)
+      yr(e.clientY)
+    }
+    const over = (e) => {
+      const interactive = e.target.closest('a, button, [data-cursor]')
+      gsap.to(ring.current, { scale: interactive ? 2 : 1, duration: 0.35, ease: 'power2.out' })
+    }
+    window.addEventListener('mousemove', move)
+    window.addEventListener('mouseover', over)
+    return () => {
+      window.removeEventListener('mousemove', move)
+      window.removeEventListener('mouseover', over)
+    }
+  }, [])
+
+  return (
+    <>
+      <div ref={dot} className="cursor-dot" />
+      <div ref={ring} className="cursor-ring" />
+    </>
+  )
+}
 
 function useKLTime() {
   const [time, setTime] = useState('')
@@ -122,14 +161,24 @@ function SectionLabel({ children }) {
 function ProductCard({ p }) {
   return (
     <article className="group border border-[#f4f4f2]/10 bg-[#0a0a0a]">
-      {/* image area — placeholder until campaign photos arrive */}
-      <div className="relative aspect-square overflow-hidden border-b border-[#f4f4f2]/10">
-        <div className="card-art absolute inset-0" />
-        <span className="pointer-events-none absolute inset-0 flex items-center justify-center font-display text-5xl font-medium tracking-[0.1em] text-[#f4f4f2]/[0.05]">
+      {/* image area — editorial placeholders until campaign photos arrive */}
+      <div data-img-reveal className="relative aspect-square overflow-hidden border-b border-[#f4f4f2]/10">
+        {p.img ? (
+          <img
+            src={p.img}
+            alt={`${p.name} — ${p.garment}`}
+            className="card-art img-mono absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <>
+            <div className="card-art absolute inset-0" />
+            <span className="pointer-events-none absolute inset-x-0 bottom-14 text-center font-label text-[8px] font-light tracking-[0.4em] text-[#f4f4f2]/25">
+              AWAITING TRANSMISSION
+            </span>
+          </>
+        )}
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center font-display text-5xl font-medium tracking-[0.1em] text-[#f4f4f2]/10">
           {p.code}
-        </span>
-        <span className="pointer-events-none absolute inset-x-0 bottom-14 text-center font-label text-[8px] font-light tracking-[0.4em] text-[#f4f4f2]/25">
-          {p.locked ? 'AWAITING TRANSMISSION' : 'IMAGERY TRANSMITTING SOON'}
         </span>
         <span className="absolute left-4 top-4 border border-[#f4f4f2]/25 px-3 py-1 font-label text-[8px] font-light tracking-[0.35em] text-[#f4f4f2]/70">
           {p.badge}
@@ -188,6 +237,44 @@ export default function App() {
         { autoAlpha: 0, y: 28 },
         { autoAlpha: 1, y: 0, duration: 1.6, stagger: 0.14, delay: 0.9, ease: 'power2.out' },
       )
+
+      // hero image: slow settle on load, then drifts as you scroll
+      gsap.fromTo(
+        '#hero-img',
+        { scale: 1.18, autoAlpha: 0 },
+        { scale: 1, autoAlpha: 1, duration: 2.6, delay: 0.3, ease: 'power2.out' },
+      )
+      gsap.to('#hero-img', {
+        yPercent: 14,
+        ease: 'none',
+        scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
+      })
+
+      // images unmask as they enter the viewport
+      gsap.utils.toArray('[data-img-reveal]').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { clipPath: 'inset(12% 8% 12% 8%)', scale: 1.06 },
+          {
+            clipPath: 'inset(0% 0% 0% 0%)',
+            scale: 1,
+            duration: 1.5,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 82%' },
+          },
+        )
+      })
+
+      // transmission backdrop drifts slower than the page
+      gsap.fromTo(
+        '#transmission-img',
+        { yPercent: -12 },
+        {
+          yPercent: 12,
+          ease: 'none',
+          scrollTrigger: { trigger: '#transmission', start: 'top bottom', end: 'bottom top', scrub: true },
+        },
+      )
       gsap.utils.toArray('[data-reveal]').forEach((el) => {
         gsap.fromTo(
           el,
@@ -229,6 +316,8 @@ export default function App() {
       </div>
 
       <div className="grain" />
+
+      <Cursor />
 
       {/* full-screen menu */}
       <div
@@ -295,7 +384,18 @@ export default function App() {
       <main className="relative z-10">
         {/* HERO */}
         <section id="hero" className="relative flex h-screen flex-col justify-between overflow-hidden">
-          <div className="flex items-end justify-between px-6 pt-28 md:px-10">
+          {/* full-bleed editorial image behind the wordmark */}
+          <div className="absolute inset-0">
+            <img
+              id="hero-img"
+              src="/images/hero.jpg"
+              alt=""
+              className="img-mono h-full w-full object-cover object-[50%_30%] opacity-50"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/30 to-black" />
+          </div>
+
+          <div className="relative flex items-end justify-between px-6 pt-28 md:px-10">
             <p data-hero-fade className="font-label text-[10px] font-light tracking-[0.5em] text-[#f4f4f2]/35">
               DROP 01 — SOVEREIGN
             </p>
@@ -304,7 +404,7 @@ export default function App() {
             </p>
           </div>
 
-          <div data-hero-title className="pointer-events-none select-none text-center">
+          <div data-hero-title className="pointer-events-none relative select-none text-center">
             <h1
               data-hero-fade
               className="font-display text-[clamp(3.2rem,14vw,15rem)] font-medium leading-[0.95] tracking-[0.06em] text-[#f4f4f2]"
@@ -319,7 +419,7 @@ export default function App() {
             </p>
           </div>
 
-          <div className="flex items-end justify-between px-6 pb-9 md:px-10">
+          <div className="relative flex items-end justify-between px-6 pb-9 md:px-10">
             <p data-hero-fade className="hidden max-w-[220px] font-label text-[9px] font-light leading-loose tracking-[0.35em] text-[#f4f4f2]/35 md:block">
               THREE PIECES
               <br />
@@ -380,8 +480,16 @@ export default function App() {
 
         {/* NEW TRANSMISSION — campaign strip */}
         <section id="transmission" className="relative px-6 py-28 md:px-10">
-          <div data-reveal className="relative overflow-hidden border border-[#f4f4f2]/10">
-            <div className="card-art absolute inset-0" />
+          <div data-reveal className="scanlines relative overflow-hidden border border-[#f4f4f2]/10">
+            <div className="absolute inset-0 overflow-hidden">
+              <img
+                id="transmission-img"
+                src="/images/transmission.jpg"
+                alt=""
+                className="img-mono h-[130%] w-full object-cover opacity-40"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80" />
+            </div>
             <div className="relative flex min-h-[60vh] flex-col items-center justify-center px-6 py-24 text-center">
               <SectionLabel>02 — NEW TRANSMISSION</SectionLabel>
               <h2 className="mt-8 max-w-3xl font-display text-3xl font-medium leading-[1.15] tracking-[0.06em] text-[#f4f4f2] md:text-5xl">
@@ -409,16 +517,22 @@ export default function App() {
               <a
                 key={c.n}
                 href="#collection"
-                className="cat-card group flex aspect-[4/5] flex-col justify-between border border-[#f4f4f2]/10 p-6"
+                className="cat-card group relative flex aspect-[4/5] flex-col justify-between overflow-hidden border border-[#f4f4f2]/10 p-6"
               >
-                <span className="cat-num font-label text-[10px] font-light tracking-[0.4em] text-[#f4f4f2]/30">
+                <img
+                  src={c.img}
+                  alt={c.name}
+                  className="card-art img-mono absolute inset-0 h-full w-full object-cover opacity-35 transition-opacity duration-700 group-hover:opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/40" />
+                <span className="cat-num relative font-label text-[10px] font-light tracking-[0.4em] text-[#f4f4f2]/40">
                   {c.n}
                 </span>
-                <div>
+                <div className="relative">
                   <span className="block font-display text-xl font-medium tracking-[0.14em] text-[#f4f4f2] md:text-2xl">
                     {c.name}
                   </span>
-                  <span className="mt-3 block font-label text-[8px] font-light tracking-[0.4em] text-[#f4f4f2]/30 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                  <span className="mt-3 block font-label text-[8px] font-light tracking-[0.4em] text-[#f4f4f2]/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                     ENTER →
                   </span>
                 </div>
